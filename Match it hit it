@@ -1,0 +1,184 @@
+import java.applet.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import java.util.Random;
+
+
+
+@SuppressWarnings("serial")
+public class KillBall extends Applet implements AdjustmentListener,Runnable,ActionListener {
+	
+	Thread t = null;
+	
+	AudioClip clip; 
+	Scrollbar SB1,SB2,SB3; Button fire,restart;
+	int R,G,B;	int RB,GB,BB;
+	int xMou,yMou,xMov=100,yMov=100,xGun=150,yGun=460,mouseClicked=0,around =1,boxC,end=0;
+	
+	public void init(){
+		
+		setLayout(null);
+		SB1 = new Scrollbar(Scrollbar.HORIZONTAL,0,1,0,200);
+		SB2 = new Scrollbar(Scrollbar.HORIZONTAL,0,1,0,200);
+		SB3 = new Scrollbar(Scrollbar.HORIZONTAL,0,1,0,200);
+		fire = new Button("Fire!!");
+		restart = new Button("Restart");
+		clip = getAudioClip(getCodeBase(),"bomb.au");
+		
+		
+		SB1.setBounds(400, 470,45,18);
+		SB2.setBounds(450, 470,45,18);
+		SB3.setBounds(500, 470,45,18);
+		fire.setBounds(560, 460,55,28);
+		restart.setBounds(560, 422, 55, 28);
+		
+		add(SB1); add(SB2); add(SB3); add(fire);	//add(restart);	
+		
+		SB1.setUnitIncrement(200);
+		SB2.setUnitIncrement(200);
+		SB3.setUnitIncrement(200);
+		SB1.addAdjustmentListener(this);
+		SB2.addAdjustmentListener(this);
+		SB3.addAdjustmentListener(this);
+		fire.addActionListener(this);
+		restart.addActionListener(this);
+		
+		addMouseMotionListener(new MyMouseMotionAdapter(this));
+	}
+	
+	public void start(){	
+		t = new Thread(this);
+		t.start();
+				
+	}
+	
+	public void run(){
+		Random r = new Random();
+		boxC = r.nextInt(8);
+		Graphics g = getGraphics();	
+		
+		switch(boxC){
+			case 0: RB=0;GB=0;BB=0;
+				break;
+			case 1:
+				RB=199;GB=0;BB=0;
+				break;
+			case 2:
+				RB=199;GB=199;BB=0;
+				break;
+			case 3:
+				RB=199;GB=199;BB=199;
+				break;
+			case 4:
+				RB=0;GB=199;BB=0;
+				break;
+			case 5:
+				RB=0;GB=199;BB=199;
+				break;
+			case 6:
+				RB=0;GB=0;BB=199;
+				break;
+			case 7:
+				RB=199;GB=0;BB=199;
+				break;	
+			default:
+				break;
+		
+		}
+		
+		while(yGun>50){
+			repaint(90,98,279,350);
+			if(mouseClicked==1) yGun-=10;
+			if(xMov<350 && around==1){xMov+=10; if(xMov>345) {around =-1;yMov+=30;}}
+			else{xMov-=10; if(xMov<100){ around =1; yMov+=30;}}	
+			
+			
+			if(xGun-15<xMov && xMov<xGun+15 && yGun-15<yMov && yMov<yGun+20 ){if(RB==R && GB==G && BB==B ){g.drawString("You Hit it!!!!", 190, 90);end=1; break;}else{ g.drawString("Colours didn't Match! :(", 190, 90); end=1; break;} }
+			if(yMov>400||yGun<55){g.drawString("You Lost it!!!", 190, 90); end=1; break;}
+			
+			
+			try {
+				Thread.sleep(150);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			
+		}
+		
+	}	
+	
+	
+	public void stop(){
+		t = null;
+	}
+	
+	
+	
+	public void paint (Graphics g) {
+		
+		g.drawRect(89, 96, 280, 385);
+		g.fillRect(xGun, 450, 20, 30);	
+		
+		Color colourBox = new Color(RB,GB,BB);		
+		g.setColor(colourBox);
+		g.fillRect(xMov, yMov,20,20);
+		
+				
+		Color colour = new Color(R,G,B);
+		g.setColor(colour);
+		g.fillRoundRect(475, 410, 30, 30, 10, 10);		
+		g.fillOval(xGun, yGun, 15, 15);			
+		
+	
+	}	
+	
+	
+	@Override
+	public void adjustmentValueChanged(AdjustmentEvent arg0) {
+	
+		R = SB1.getValue();
+		G = SB2.getValue();
+		B = SB3.getValue();
+		repaint(475,410,30,30);
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent a) {
+		
+		String str = a.getActionCommand();
+		if(str.equals("Fire!!")) {mouseClicked=1; clip.play();}
+		else if(str.equals("Restart")) {if(end==1){ init(); start();} }
+		
+	}
+
+	
+}
+
+class MyMouseMotionAdapter extends MouseMotionAdapter {
+	KillBall killBall;
+	public MyMouseMotionAdapter(KillBall killBall) {
+		
+		this.killBall = killBall;		
+	}
+	public void mouseDragged(MouseEvent me){
+		int x = me.getX();
+		int y = me.getY();		
+		
+		if(x<480 && y>450 && y<480 && x>50){
+			killBall.xGun =x;
+			killBall.yGun =y;
+			killBall.mouseClicked = 0;
+			killBall.repaint(90,450,280,30);
+		}
+	}
+	
+	
+	
+}
