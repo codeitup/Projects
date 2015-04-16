@@ -3,7 +3,7 @@
 		<title>KillBallGame</title>
 	<head>
 
-<applet  codebase = "C:\Users\Tushit\Desktop\"
+<applet  codebase = "file Location"
 	code = "KillBall.class" width="620" height="520"  alt="Install JAVA(TM) Plugin to enjoy the little game!!">
 		Please install JAVA(TM) plugin in your browser & enjoy a sweet little game!!!
 </applet>
